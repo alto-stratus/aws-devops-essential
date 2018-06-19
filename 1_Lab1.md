@@ -10,7 +10,7 @@ Take a moment now and setup your Cloud9 development environment.
 
 1. Go to the AWS Management Console, click **Services** then select **Cloud9** under Developer Tools.
 2. Click **Create environment**.
-3. Enter `MyDevEnvironment` into **Name** and optionally provide a **Description**.
+3. Enter `MyDevEnvironment-<name>` into **Name** and optionally provide a **Description**.
 4. Click **Next step**.
 5. You may leave **Environment settings** at their defaults of launching a new **t2.micro** EC2 instance which will be paused after **30 minutes** of inactivity.
 6. Click **Next step**.
