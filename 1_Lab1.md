@@ -10,7 +10,7 @@ Take a moment now and setup your Cloud9 development environment.
 
 1. Go to the AWS Management Console, click **Services** then select **Cloud9** under Developer Tools.
 2. Click **Create environment**.
-3. Enter `MyDevEnvironment-<name>` into **Name** and optionally provide a **Description**.
+3. Enter `MyDevEnvironment-<NAME>` into **Name** and optionally provide a **Description**.
 4. Click **Next step**.
 5. You may leave **Environment settings** at their defaults of launching a new **t2.micro** EC2 instance which will be paused after **30 minutes** of inactivity.
 6. Click **Next step**.
@@ -50,11 +50,11 @@ Keep an open scratch pad in Cloud9 or a text editor on your local computer for n
 1. Open the AWS CodeCommit console at <https://console.aws.amazon.com/codecommit>.
 2. In the region selector, choose the region where you will create the repository. For more information, see [Regions and Git Connection Endpoints](http://docs.aws.amazon.com/codecommit/latest/userguide/regions.html).
 3. On the Welcome page, choose Get Started Now. (If a **_Dashboard_** page appears instead, choose **_Create repository_**.)
-4. On the **_Create repository_** page, in the **_Repository name_** box, type **_WebAppRepo_**.
+4. On the **_Create repository_** page, in the **_Repository name_** box, type **_WebAppRepo-<NAME>_**.
 5. In the **_Description_** box, type **_My demonstration repository_**.
-6. Choose **_Create repository_** to create an empty AWS CodeCommit repository named **_WebAppRepo_**.
+6. Choose **_Create repository_** to create an empty AWS CodeCommit repository named **_WebAppRepo-<NAME>_**.
 
-**_Note_** The remaining steps in this tutorial assume you have named your AWS CodeCommit repository **_WebAppRepo_**. If you use a name other than **_WebAppRepo_**, be sure to use it throughout this tutorial. For more information about creating repositories, including how to create a repository from the terminal or command line, see [Create a Repository](http://docs.aws.amazon.com/codecommit/latest/userguide/how-to-create-repository.html).
+**_Note_** The remaining steps in this tutorial assume you have named your AWS CodeCommit repository **_WebAppRepo-<NAME>_**. If you use a name other than **_WebAppRepo-<NAME>_**, be sure to use it throughout this tutorial. For more information about creating repositories, including how to create a repository from the terminal or command line, see [Create a Repository](http://docs.aws.amazon.com/codecommit/latest/userguide/how-to-create-repository.html).
 
 ***
 
@@ -67,7 +67,7 @@ In this step, you will connect to the source repository created in the previous 
 3. Run git clone to pull down a copy of the repository into the local repo:
 
 ```console
-user:~/environment $ git clone https://git-codecommit.<YOUR-REGION>.amazonaws.com/v1/repos/WebAppRepo
+user:~/environment $ git clone https://git-codecommit.<YOUR-REGION>.amazonaws.com/v1/repos/WebAppRepo-<NAME>
 
 ```
 
@@ -87,14 +87,14 @@ user:~/environment $ wget https://github.com/awslabs/aws-devops-essential/raw/ma
 
 ```console
 user:~/environment $ unzip Web-App-Archive.zip
-user:~/environment $ mv -v Web-App-Archive/* WebAppRepo/
+user:~/environment $ mv -v Web-App-Archive/* WebAppRepo-<NAME>/
 ```
 
 After moving the files, your local repo should like the one below. ![cloud9](./img/Cloud9-IDE-Screen-Sample.png)
 3. Change the directory to your local repo folder. Run **_git add_** to stage the change:
 
 ```console
-user:~/environment $ cd WebAppRepo
+user:~/environment $ cd WebAppRepo-<NAME>
 user:~/environment/WebAppRepo/ $ git add *
 ```
 
@@ -130,7 +130,7 @@ Provide your Git HTTPs credential when prompted. Credential helper will store it
   Ensure you are launching it in the same region as your AWS CodeCommit repo.
 
 ```console
-user:~/environment/WebAppRepo (master) $ aws cloudformation create-stack --stack-name DevopsWorkshop-roles \
+user:~/environment/WebAppRepo (master) $ aws cloudformation create-stack --stack-name DevopsWorkshop-roles-<NAME> \
 --template-body https://github.com/awslabs/aws-devops-essential/raw/master/templates/01-aws-devops-workshop-roles.template \
 --capabilities CAPABILITY_IAM
 ```
@@ -145,16 +145,16 @@ user:~/environment/WebAppRepo (master) $ aws cloudformation create-stack --stack
 
 ```json
 {
-  "name": "devops-webapp-project",
+  "name": "devops-webapp-project-<NAME>",
   "source": {
     "type": "CODECOMMIT",
-    "location": "https://git-codecommit.<<YOUR-REGION-ID>>.amazonaws.com/v1/repos/WebAppRepo"
+    "location": "https://git-codecommit.<<YOUR-REGION-ID>>.amazonaws.com/v1/repos/WebAppRepo-<NAME>"
   },
   "artifacts": {
     "type": "S3",
     "location": "<<YOUR-CODEBUILD-OUTPUT-BUCKET>>",
     "packaging": "ZIP",
-    "name": "WebAppOutputArtifact.zip"
+    "name": "WebAppOutputArtifact-<NAME>.zip"
   },
   "environment": {
     "type": "LINUX_CONTAINER",
@@ -235,7 +235,7 @@ user:~/environment/WebAppRepo (master) $ aws codebuild create-project --cli-inpu
 ### Stage 5: Let's build the code on cloud
 
 1. A build spec is a collection of build commands and related settings in YAML format, that AWS CodeBuild uses to run a build.
-    Create a file namely, **_buildspec.yml_** under **WebAppRepo** folder. Copy the content below to the file and save it. To know more about [how CodeBuild works](http://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html#concepts-how-it-works).
+    Create a file namely, **_buildspec.yml_** under **WebAppRepo-<NAME>** folder. Copy the content below to the file and save it. To know more about [how CodeBuild works](http://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html#concepts-how-it-works).
 
 ```
 version: 0.1
@@ -269,7 +269,7 @@ As a sample shown below:
 2. Run the **_start-build_** command:
 
 ```console
-user:~/environment/WebAppRepo (master) $ aws codebuild start-build --project-name devops-webapp-project
+user:~/environment/WebAppRepo (master) $ aws codebuild start-build --project-name devops-webapp-project-<NAME>
 ```
 
 **_Note:_** You can start build with more advance configuration setting via JSON. If you are interested to learn more about it, please visit [here](http://docs.aws.amazon.com/codebuild/latest/userguide/run-build.html#run-build-cli).
@@ -285,7 +285,7 @@ user:~/environment/WebAppRepo (master) $ aws codebuild batch-get-builds --ids <<
 
 5. Did the build succeed? if the build failed, why? The reason is build spec YAML file is not pushed to the repository. Push the code changes by **git add, commit, and push**. **Repeat** steps from 2 through 4.
 6. You will also be able to view detailed information about your build in CloudWatch Logs. You can complete this step by visiting the AWS CodeBuild console.
-7. In this step, you will verify the **_WebAppOutputArtifact.zip_** file that AWS CodeBuild built and then uploaded to the output bucket. You can complete this step by **visiting** the **AWS CodeBuild console** or the **Amazon S3 console**.
+7. In this step, you will verify the **_WebAppOutputArtifact-<NAME>.zip_** file that AWS CodeBuild built and then uploaded to the output bucket. You can complete this step by **visiting** the **AWS CodeBuild console** or the **Amazon S3 console**.
 
 **_Note:_** Troubleshooting CodeBuild - Use the [information](http://docs.aws.amazon.com/codebuild/latest/userguide/troubleshooting.html) to help you identify, diagnose, and address issues.
 
